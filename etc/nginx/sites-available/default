@@ -1,0 +1,37 @@
+server {
+    listen      80;
+    server_name www.domain.com;
+
+    return      301 http://domain.com$request_uri;
+}
+
+server {
+    access_log  /var/log/nginx/domain.com.access;
+    error_log   /var/log/nginx/domain.com.error;
+    index       index.php index.html index.htm;
+    listen      80 default_server;
+    root        /var/www;
+    server_name domain.com;
+    try_files   $uri $uri/ /index.php?$query_string;
+
+    location ~ /\. {
+        return          404;
+    }
+
+    location = /favicon.ico {
+        access_log  off;
+        log_not_found   off;
+    }
+
+    location = /robots.txt {
+        access_log  off;
+        log_not_found   off;
+    }
+
+    location ~* \.php {
+        fastcgi_index           index.php;
+        fastcgi_pass            unix:/run/php5-fpm.sock;
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        include                 fastcgi_params;
+    }
+}
